@@ -49,6 +49,7 @@ type FDSAuth struct {
 	Data         string
 	Content_Md5  string
 	Content_Type string
+	Headers      map[string]string
 }
 
 func NEWFDSClient(App_key, App_secret string) *FDSClient {
@@ -64,6 +65,9 @@ func (c *FDSClient) Auth(auth FDSAuth) (*http.Response, error) {
 	date, signature := Signature(c.App_key,
 		c.App_secret, req.Method, auth.Url,
 		auth.Content_Md5, auth.Content_Type)
+	for k, v := range auth.Headers {
+		req.Header.Add(k, v)
+	}
 	req.Header.Add("authorization", signature)
 	req.Header.Add("date", date)
 	req.Header.Add("content-md5", auth.Content_Md5)
@@ -80,6 +84,7 @@ func (c *FDSClient) Is_Bucket_Exit(bucketname string) (bool, error) {
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -106,6 +111,7 @@ func (c *FDSClient) List_Bucket() ([]string, error) {
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -141,6 +147,7 @@ func (c *FDSClient) Create_Bucket(bucketname string) (bool, error) {
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -166,6 +173,7 @@ func (c *FDSClient) Delete_Bucket(bucketname string) (bool, error) {
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -191,6 +199,7 @@ func (c *FDSClient) Is_Object_Exit(bucketname, objectname string) (bool, error) 
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -208,55 +217,41 @@ func (c *FDSClient) Is_Object_Exit(bucketname, objectname string) (bool, error) 
 	}
 }
 
-// func (c *FDSClient) GetObject(bucketname, objectname string, postion, size int) (interface{}, error) {
-// 	if postion < 0 {
-// 		panic("Seek position should be no less than 0")
-// 	}
-// 	client := &http.Client{}
-// 	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + DELIMITER + objectname
-// 	req, _ := http.NewRequest("GET", url, nil)
-// 	if postion > 0 {
-// 		req.Header.Add("range", fmt.Sprintf("bytes=%d-", size))
-// 	}
-// 	date, signature := Signature(c.App_key, c.App_secret, req.Method, url)
-// 	req.Header.Add("authorization", signature)
-// 	req.Header.Add("date", date)
-// 	res, err := client.Do(req)
-// 	if err != nil {
-// 		return false, err
-// 	}
-// 	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusPartialContent {
-// 		obj := make(map[string]map[string]string)
-// 		summary := make(map[string]string)
-// 		metadata := make(map[string]string)
-// 		summary["bucket_name"] = bucketname
-// 		summary["object_name"] = objectname
-// 		summary["size"] = string(res.ContentLength)
-// 		// obj["stream"]
-// 		obj["summary"] = summary
-// 		for _, key := range PRE_DEFINED_METADATA {
-// 			metadata[key] = res.Header.Get(key)
-// 		}
-// 		obj["metadata"] = metadata
-// 		return obj, nil
-// 		// obj = FDSObject()
-// 		// obj.stream = response.iter_content(chunk_size=size)
-// 		// summary = FDSObjectSummary()
-// 		// summary.bucket_name = bucket_name
-// 		// summary.object_name = object_name
-// 		// summary.size = int(response.headers['content-length'])
-// 		// obj.summary = summary
-// 		// obj.metadata = self._parse_object_metadata_from_headers(response.headers)
-// 		// return obj
-// 	} else {
-// 		body, err := ioutil.ReadAll(res.Body)
-// 		res.Body.Close()
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return nil, errors.New(string(body))
-// 	}
-// }
+func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int) (string, error) {
+	if postion < 0 {
+		err := errors.New("Seek position should be no less than 0")
+		return "", err
+	}
+	if postion > 0 {
+		req.Header.Add("range", fmt.Sprintf("bytes=%d-", size))
+	}
+	auth := FDSAuth{
+		Url:          url,
+		Method:       "GET",
+		Data:         "",
+		Content_Md5:  "",
+		Content_Type: "",
+		Headers:      map[string]string{},
+	}
+	res, err := c.Auth(auth)
+	if err != nil {
+		return "", err
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		return "", err
+	}
+	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusPartialContent {
+		content := string(body)
+		if len(content) > size {
+			content = content[0:size]
+		}
+		return content, nil
+	} else {
+		return nil, errors.New(string(body))
+	}
+}
 
 // prefix需要改进
 func (c *FDSClient) List_Object(bucketname, prefix string) ([]string, error) {
@@ -268,6 +263,7 @@ func (c *FDSClient) List_Object(bucketname, prefix string) ([]string, error) {
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -308,6 +304,7 @@ func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, erro
 		Data:         data,
 		Content_Md5:  "",
 		Content_Type: content_type,
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -343,6 +340,7 @@ func (c *FDSClient) Put_Object(bucketname, objectname, data, filetype string) (b
 		Data:         data,
 		Content_Md5:  "",
 		Content_Type: content_type,
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -368,6 +366,7 @@ func (c *FDSClient) Delete_Object(bucketname, objectname string) (bool, error) {
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -394,6 +393,7 @@ func (c *FDSClient) Rename_Object(bucketname, src_objectname, dst_objectname str
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -419,6 +419,7 @@ func (c *FDSClient) Prefetch_Object(bucketname, objectname string) (bool, error)
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -444,6 +445,7 @@ func (c *FDSClient) Refresh_Object(bucketname, objectname string) (bool, error) 
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -473,6 +475,7 @@ func (c *FDSClient) Set_Object_Acl(bucketname, objectname string, acl map[string
 		Data:         string(jsonString),
 		Content_Md5:  "",
 		Content_Type: "",
+		Headers:      map[string]string{},
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
