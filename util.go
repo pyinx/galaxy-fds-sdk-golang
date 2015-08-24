@@ -225,7 +225,7 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + DELIMITER + objectname
 	headers := map[string]string{}
 	if postion > 0 {
-		headers["range"] = "bytes=%d-" + size
+		headers["range"] = "bytes=" + string(size) + "-"
 	}
 	auth := FDSAuth{
 		Url:          url,
