@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	c := galaxy_fds_sdk_golang.NewClient("YOUR_APP_KEY", "YOUR_APP_SECRET")
+	c := galaxy_fds_sdk_golang.NewFDSClient("YOUR_APP_KEY", "YOUR_APP_SECRET")
 	fmt.Println(c.Create_Bucket("test-testaaaaaaaaaa"))
 	fmt.Println(c.Delete_Bucket("test-testaaaaaaaaaa"))
 	c.List_Bucket()

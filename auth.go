@@ -10,12 +10,13 @@ import (
 	"time"
 )
 
-func Signature(app_key, app_secret, method, u string) (string, string) {
+func Signature(app_key, app_secret, method, u, content_md5, content_type string) (string, string) {
 	var string_to_sign string
 	var uri string
 	date := time.Now().Format(time.RFC1123)
 	string_to_sign += method + "\n"
-	string_to_sign += "" + "\n" + "" + "\n"
+	string_to_sign += content_md5 + "\n"
+	string_to_sign += content_type + "\n"
 	string_to_sign += date + "\n"
 	url_str, _ := url.ParseRequestURI(u)
 	if strings.Contains(url_str.RequestURI(), "?") {
