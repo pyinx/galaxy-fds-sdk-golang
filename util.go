@@ -3,7 +3,6 @@ package galaxy_fds_sdk_golang
 import (
 	// "crypto/md5"
 	"encoding/json"
-	"fmt"
 	"github.com/bitly/go-simplejson"
 	// "io"
 	"errors"
@@ -467,7 +466,6 @@ func (c *FDSClient) Set_Object_Acl(bucketname, objectname string, acl map[string
 	acp["owner"] = map[string]string{"id": c.App_key}
 	acp["accessControlList"] = []interface{}{acl}
 	jsonString, _ := json.Marshal(acp)
-	fmt.Println(string(jsonString))
 	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + DELIMITER + objectname + "?acl"
 	auth := FDSAuth{
 		Url:          url,
@@ -492,7 +490,7 @@ func (c *FDSClient) Set_Object_Acl(bucketname, objectname string, acl map[string
 	}
 }
 
-func (c *FDSClient) Set_Public(bucketname, objectname string, is_prefetch bool) (bool, error) {
+func (c *FDSClient) Set_Public(bucketname, objectname string, disable_prefetch bool) (bool, error) {
 	grant := map[string]interface{}{
 		"grantee":    ALL_USERS,
 		"type":       PERMISSION_GROUP,
@@ -506,7 +504,7 @@ func (c *FDSClient) Set_Public(bucketname, objectname string, is_prefetch bool) 
 	if err != nil {
 		return false, err
 	}
-	if !is_prefetch {
+	if !disable_prefetch {
 		_, err := c.Prefetch_Object(bucketname, objectname)
 		if err != nil {
 			return false, err
