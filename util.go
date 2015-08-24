@@ -222,8 +222,10 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 		err := errors.New("Seek position should be no less than 0")
 		return "", err
 	}
+	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + DELIMITER + objectname
+	headers := map[string]string{}
 	if postion > 0 {
-		req.Header.Add("range", fmt.Sprintf("bytes=%d-", size))
+		headers["range"] = "bytes=%d-" + size
 	}
 	auth := FDSAuth{
 		Url:          url,
@@ -231,7 +233,7 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 		Data:         "",
 		Content_Md5:  "",
 		Content_Type: "",
-		Headers:      map[string]string{},
+		Headers:      headers,
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
@@ -249,7 +251,7 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 		}
 		return content, nil
 	} else {
-		return nil, errors.New(string(body))
+		return "", errors.New(string(body))
 	}
 }
 
