@@ -6,6 +6,7 @@ import (
 	"github.com/bitly/go-simplejson"
 	// "io"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -222,10 +223,10 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 		err := errors.New("Seek position should be no less than 0")
 		return "", err
 	}
-	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + DELIMITER + objectname
+	url := DEFAULT_CDN_SERVICE_URI + bucketname + DELIMITER + objectname
 	headers := map[string]string{}
 	if postion > 0 {
-		headers["range"] = "bytes=" + string(size) + "-"
+		headers["range"] = fmt.Sprintf("bytes=%d-", postion)
 	}
 	auth := FDSAuth{
 		Url:          url,
