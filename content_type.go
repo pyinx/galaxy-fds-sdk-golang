@@ -20,6 +20,8 @@ var CONTENT_TYPE = map[string]string{
 	"asx":   "video/x-ms-asf",
 	"au":    "audio/basic",
 	"avi":   "video/avi",
+	"apk":   "application/vnd.android.package-archive",
+	"webm":  "video/webm",
 	"awf":   "application/vndadobeworkflow",
 	"biz":   "text/xml",
 	"bmp":   "application/x-bmp",
