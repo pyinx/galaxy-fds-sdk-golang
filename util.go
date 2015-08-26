@@ -257,9 +257,9 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 }
 
 // prefix需要改进
-func (c *FDSClient) List_Object(bucketname, prefix string) ([]string, error) {
+func (c *FDSClient) List_Object(bucketname) ([]string, error) {
 	listobject := []string{}
-	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + "?prefix=" + prefix + "&delimiter=" + DELIMITER
+	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + "?prefix=&delimiter=" + DELIMITER
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "GET",

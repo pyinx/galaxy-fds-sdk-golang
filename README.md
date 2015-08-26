@@ -22,7 +22,7 @@ func main() {
 	fmt.Println(c.Is_Object_Exists("test-testaaaaaa", "a.jpg"))
 	content := c.Get_Object("test-testaaaaaa", "2.txt", 0, 100)
 	fmt.Println(content)
-	c.List_Object("test-testaaaaaa", "")
+	c.List_Object("test-testaaaaaa")
 	c.Post_Object("test-testaaaaaa", "abcdefgssss")
 	c.Put_Object("test-testaaaaaa", "1.txt", "abcdefg")
 	fmt.Println(c.Delete_Object("test-testaaaaaa", "2.txt"))
