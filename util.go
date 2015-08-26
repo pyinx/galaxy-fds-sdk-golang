@@ -77,7 +77,7 @@ func (c *FDSClient) Auth(auth FDSAuth) (*http.Response, error) {
 	return res, err
 }
 
-func (c *FDSClient) Is_Bucket_Exit(bucketname string) (bool, error) {
+func (c *FDSClient) Is_Bucket_Exists(bucketname string) (bool, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname
 	auth := FDSAuth{
 		Url:          url,
@@ -192,7 +192,7 @@ func (c *FDSClient) Delete_Bucket(bucketname string) (bool, error) {
 	}
 }
 
-func (c *FDSClient) Is_Object_Exit(bucketname, objectname string) (bool, error) {
+func (c *FDSClient) Is_Object_Exists(bucketname, objectname string) (bool, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI + bucketname + DELIMITER + objectname
 	auth := FDSAuth{
 		Url:          url,
