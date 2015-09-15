@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"strings"
 )
@@ -297,9 +298,11 @@ func (c *FDSClient) List_Object(bucketname string) ([]string, error) {
 // v1类型
 func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI_HTTPS + bucketname + DELIMITER
-	var content_type string
-	content_type, ok := CONTENT_TYPE[filetype]
-	if !ok {
+	if !strings.HasPrefix(filetype, ".") {
+		filetype = "." + filetype
+	}
+	content_type := mime.TypeByExtension(filetype)
+	if content_type == "" {
 		content_type = "application/octet-stream"
 	}
 	auth := FDSAuth{
@@ -334,9 +337,11 @@ func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, erro
 // v2类型  自定义文件名 如果object已存在，将会覆盖
 func (c *FDSClient) Put_Object(bucketname, objectname, data, filetype string) (bool, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI_HTTPS + bucketname + DELIMITER + objectname
-	var content_type string
-	content_type, ok := CONTENT_TYPE[filetype]
-	if !ok {
+	if !strings.HasPrefix(filetype, ".") {
+		filetype = "." + filetype
+	}
+	content_type := mime.TypeByExtension(filetype)
+	if content_type == "" {
 		content_type = "application/octet-stream"
 	}
 	auth := FDSAuth{
