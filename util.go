@@ -11,6 +11,8 @@ import (
 	"mime"
 	"net/http"
 	"strings"
+	"bytes"
+	"cmd/go/testdata/src/vend/x/vendor/r"
 )
 
 const (
@@ -48,7 +50,7 @@ type FDSClient struct {
 type FDSAuth struct {
 	Url          string
 	Method       string
-	Data         string
+	Data         []byte
 	Content_Md5  string
 	Content_Type string
 	Headers      map[string]string
@@ -63,7 +65,12 @@ func NEWFDSClient(App_key, App_secret string) *FDSClient {
 
 func (c *FDSClient) Auth(auth FDSAuth) (*http.Response, error) {
 	client := &http.Client{}
-	req, _ := http.NewRequest(auth.Method, auth.Url, strings.NewReader(auth.Data))
+	var reader bytes.Reader = nil
+	if auth.Data != nil {
+		reader = bytes.NewReader(auth.Data)
+	}
+
+	req, _ := http.NewRequest(auth.Method, auth.Url, reader)
 	date, signature := Signature(c.App_key,
 		c.App_secret, req.Method, auth.Url,
 		auth.Content_Md5, auth.Content_Type)
@@ -83,7 +90,7 @@ func (c *FDSClient) Is_Bucket_Exists(bucketname string) (bool, error) {
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "HEAD",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -110,7 +117,7 @@ func (c *FDSClient) List_Bucket() ([]string, error) {
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "GET",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -146,7 +153,7 @@ func (c *FDSClient) Create_Bucket(bucketname string) (bool, error) {
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "PUT",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -172,7 +179,7 @@ func (c *FDSClient) Delete_Bucket(bucketname string) (bool, error) {
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "DELETE",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -198,7 +205,7 @@ func (c *FDSClient) Is_Object_Exists(bucketname, objectname string) (bool, error
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "HEAD",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -232,7 +239,7 @@ func (c *FDSClient) Get_Object(bucketname, objectname string, postion, size int)
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "GET",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      headers,
@@ -264,7 +271,7 @@ func (c *FDSClient) List_Object(bucketname string) ([]string, error) {
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "GET",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -296,7 +303,7 @@ func (c *FDSClient) List_Object(bucketname string) ([]string, error) {
 }
 
 // v1类型
-func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, error) {
+func (c *FDSClient) Post_Object(bucketname, data []byte, filetype string) (string, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI_HTTPS + bucketname + DELIMITER
 	if !strings.HasPrefix(filetype, ".") {
 		filetype = "." + filetype
@@ -335,7 +342,7 @@ func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, erro
 }
 
 // v2类型  自定义文件名 如果object已存在，将会覆盖
-func (c *FDSClient) Put_Object(bucketname, objectname, data, filetype string) (bool, error) {
+func (c *FDSClient) Put_Object(bucketname, objectname, data []byte, filetype string) (bool, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI_HTTPS + bucketname + DELIMITER + objectname
 	if !strings.HasPrefix(filetype, ".") {
 		filetype = "." + filetype
@@ -373,7 +380,7 @@ func (c *FDSClient) Delete_Object(bucketname, objectname string) (bool, error) {
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "DELETE",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -400,7 +407,7 @@ func (c *FDSClient) Rename_Object(bucketname, src_objectname, dst_objectname str
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "PUT",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -426,7 +433,7 @@ func (c *FDSClient) Prefetch_Object(bucketname, objectname string) (bool, error)
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "PUT",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -452,7 +459,7 @@ func (c *FDSClient) Refresh_Object(bucketname, objectname string) (bool, error) 
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "PUT",
-		Data:         "",
+		Data:         nil,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
@@ -482,7 +489,7 @@ func (c *FDSClient) Set_Object_Acl(bucketname, objectname string, acl map[string
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "PUT",
-		Data:         string(jsonString),
+		Data:         jsonString,
 		Content_Md5:  "",
 		Content_Type: "",
 		Headers:      map[string]string{},
