@@ -23,8 +23,8 @@ func main() {
 	content := c.Get_Object("test-testaaaaaa", "2.txt", 0, 100)
 	fmt.Println(content)
 	c.List_Object("test-testaaaaaa")
-	c.Post_Object("test-testaaaaaa", "abcdefgssss")
-	c.Put_Object("test-testaaaaaa", "1.txt", "abcdefg")
+	c.Post_Object("test-testaaaaaa", "abcdefgssss", 300) // cache-control:300
+	c.Put_Object("test-testaaaaaa", "1.txt", "abcdefg", 300)
 	fmt.Println(c.Delete_Object("test-testaaaaaa", "2.txt"))
 	fmt.Println(c.Rename_Object("test-testaaaaaa", "1.txt", "2.txt"))
 	// Set_Public最后一个参数表示是否需要关闭CDN预取，如无特殊需要建议设成true
