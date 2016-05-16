@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"mime"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -296,7 +297,7 @@ func (c *FDSClient) List_Object(bucketname string) ([]string, error) {
 }
 
 // v1类型
-func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, error) {
+func (c *FDSClient) Post_Object(bucketname, data, filetype string, cachecontrol int) (string, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI_HTTPS + bucketname + DELIMITER
 	if !strings.HasPrefix(filetype, ".") {
 		filetype = "." + filetype
@@ -305,6 +306,8 @@ func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, erro
 	if content_type == "" {
 		content_type = "application/octet-stream"
 	}
+	headers := map[string]string{}
+	headers["cache-control"] = strconv.Itoa(cachecontrol)
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "POST",
@@ -335,7 +338,7 @@ func (c *FDSClient) Post_Object(bucketname, data, filetype string) (string, erro
 }
 
 // v2类型  自定义文件名 如果object已存在，将会覆盖
-func (c *FDSClient) Put_Object(bucketname, objectname, data, filetype string) (bool, error) {
+func (c *FDSClient) Put_Object(bucketname, objectname, data, filetype string, cachecontrol int) (bool, error) {
 	url := DEFAULT_FDS_SERVICE_BASE_URI_HTTPS + bucketname + DELIMITER + objectname
 	if !strings.HasPrefix(filetype, ".") {
 		filetype = "." + filetype
@@ -344,13 +347,15 @@ func (c *FDSClient) Put_Object(bucketname, objectname, data, filetype string) (b
 	if content_type == "" {
 		content_type = "application/octet-stream"
 	}
+	headers := map[string]string{}
+	headers["cache-control"] = strconv.Itoa(cachecontrol)
 	auth := FDSAuth{
 		Url:          url,
 		Method:       "PUT",
 		Data:         data,
 		Content_Md5:  "",
 		Content_Type: content_type,
-		Headers:      map[string]string{},
+		Headers:      headers,
 	}
 	res, err := c.Auth(auth)
 	if err != nil {
